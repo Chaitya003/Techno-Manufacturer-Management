@@ -1,0 +1,432 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- <script src="{% static 'js/main.js' %}"></script> -->
+    <!-- <script src="{% static 'js/login.js' %}"></script> -->
+    <title>Production Page</title>
+</head>
+
+<body>
+
+    <div class="half-page">
+        <form class="login-form" action="">
+            <div class="form-header">
+                <h3> New Coil</h3>
+                <p>Fill in the details to start production Coil.</p>
+            </div>
+            <div class="form-group">
+                <p> Coil Number</p>
+                <input type="text" class="form-input" id="coil-number">
+            </div>
+            <div class="form-group">
+                <p> Item</p>
+                <select name="pipe-alloy" id="item" class="form-input">
+                    <option value=""></option>
+                    {% for i in item %}
+                        <option  value='{{i.item_code}}'>{{i.item_code}}</option>
+                    {% endfor %}    
+                </select>
+            </div>
+            <div class="form-group">
+                <p> Pipe Lotnumber</p>
+                <select name="pipe" id="pipe" class="form-input">
+                    <option value=""></option>
+                    {% for pipe in pipe_lotnumber %}
+                        <option  value='{{pipe.lot_number}}'>{{pipe.lot_number}}</option>
+                    {% endfor %}    
+                </select>
+            </div>
+            <div class="form-group">
+                <p>Pipe Quantity</p>
+                <input type="number" class="form-input" id="pipe-qty">
+            </div>
+
+            <div class="form-group">
+                <p> Conductor Lotnumber</p>
+                <select name="conductor" id="conductor" class="form-input">
+                    <option value=""></option>
+                    {% for conductor in conductor_lotnumber %}
+                        <option  value='{{conductor.lot_number}}'>{{conductor.lot_number}}</option>
+                    {% endfor %}    
+                </select>
+            </div>
+            <div class="form-group">
+                <p>Conductor Quantity</p>
+                <input type="number" class="form-input" id="conductor-qty">
+            </div>
+
+            <div class="form-group">
+                <p> MGO Lotnumber</p>
+                <select name="mgo" id="mgo" class="form-input">
+                    <option value=""></option>
+                    {% for mgo in mgo_lotnumber %}
+                        <option  value='{{mgo.lot_number}}'>{{mgo.lot_number}}</option>
+                    {% endfor %}    
+                </select>
+            </div>
+            <div class="form-group">
+                <p>MGO Quantity</p>
+                <input type="number" class="form-input" id="mgo-qty">
+            </div>
+            
+        
+            <div class="form-group">
+                <button class="form-button" type="button" id="save-btn">Save Coil</button>
+            </div>
+        </form>     
+    </div>
+
+    <div class="half-page">
+        <form class="login-form" action="">
+            <div class="form-header">
+                <h3> Coil Status</h3>
+                <p>Check and update status of your coil using number.</p>    
+            </div>
+            <div class="form-group">
+                <p>Coil</p>
+                <select name="all-coils" id="all-coils" class="form-input" onchange="loadDrawAnnealing()">
+                    <option value=""></option>
+                    {% for coil in coil_list %}
+                        <option  value='{{coil.coil_number}}'>{{coil.coil_number}}</option>
+                    {% endfor %}      
+                </select>
+            </div>
+            <div class="form-group">
+                <p>Select Activity</p>
+                <input type="radio" id="DRAW" name="coil-status" value="DRAW" class="form-radio-button"><label for="DRAW" class="form-radio-button-text">Draw</label>
+                <input type="radio" id="ANNEALING" name="coil-status" value="ANNEALING" class="form-radio-button"><label for="ANNEALING" class="form-radio-button-text">Annealing</label>
+            </div>
+
+            <div class="form-group">
+                <p id="coil-diameter-name">Coil Diameter</p>
+                <input type="number" class="form-input" id="coil-diameter">
+            </div>
+
+            <div class="form-group">
+                <p id="drawbench-name"> Select Draw Bench</p>
+                <select name="drawbench" id="drawbench" class="form-input">
+                    <option value=""></option>
+                    {% for drawbench in drawbenches %}
+                        <option  value='{{drawbench.draw_bench_name}}'>{{drawbench.draw_bench_name}}</option>
+                    {% endfor %}    
+                </select>
+                <p id="furnace-name"> Select Furnace</p>
+                <select name="furnace" id="furnace" class="form-input">
+                    <option value=""></option>
+                    {% for furnace in furnaces %}
+                        <option  value='{{furnace.furnace_name}}'>{{furnace.furnace_name}}</option>
+                    {% endfor %}    
+                </select>
+            </div>
+
+            <div class="form-group">
+                <button class="form-button-coil-status" type="button" id="start-process">Start Process</button>
+                <button class="form-button-coil-status" type="button" id="stop-process">Stop Process</button>
+            </div>
+
+
+            <div class="form-group">
+                <button class="form-button" type="button" id="coil-complete">Send Coil to QA</button>
+            </div>
+
+        </form>    
+    </div>
+
+
+  
+
+
+
+    <script>
+        function getCsrfToken() {
+            var CSRF_TOKEN = $('input[name="csrfmiddlewaretoken"]').val();
+            return CSRF_TOKEN;
+        }
+
+
+        $("#save-btn").click(function (e) {
+            var coil = $("#coil-number").val()
+            var pipeQty = $("#pipe-qty").val()
+            var conductorQty = $("#conductor-qty").val()
+            var mgoQty = $("#mgo-qty").val()
+
+            var item = $("#item").val()
+            var pipeLotNumber = $("#pipe").val()
+            console.log(pipeLotNumber)
+            var conductorLotNumber = $("#conductor").val()
+            var mgoLotNumber = $("#mgo").val()
+            
+            
+            if(coil.length==0 || pipeQty.length==0 || conductorQty.length==0 || mgoQty.length==0 || item.length==0 || pipeLotNumber.length==0 || conductorLotNumber.length==0 || mgoLotNumber.length==0){
+                window.alert("All the fields are  required! Kindly fill them.")
+            }
+            else{      
+                $.ajax({
+                    url: "/start-coil-production/",
+                    type: "POST",
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    data: {
+                        coil:coil,
+                        item:item,
+                        pipeLotNumber:pipeLotNumber,
+                        pipeQty:parseFloat(pipeQty),
+                        conductorLotNumber:conductorLotNumber,
+                        conductorQty:parseFloat(conductorQty),
+                        mgoLotNumber:mgoLotNumber,
+                        mgoQty:parseFloat(mgoQty)
+                    },
+                    success: function (response) {
+                        console.log("Success!", response);
+                        
+                        if (response["status"] == 200) {
+                            window.alert("Success!!!")
+                            window.location.pathname = "/production"
+                            window.location.reload();
+                        }
+                        else {
+                            window.alert(response["error-msg"]);
+                        }
+                    },
+                    error: function (xhr, textstatus, errorthrown) {
+                        console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                    }
+                });
+            
+        }
+        });
+
+        function loadDrawAnnealing(){
+            $.ajax({
+                url: "/fetch-draw-annealing-status/",
+                type: "POST",
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                },
+                data: {
+                    coil: $( "#all-coils" ).val()
+                },
+                success: function (response) {
+                    console.log("Success!", response);
+
+                    if (response["status"] == 200) {
+                        
+                        if(response["can_move_QA"]=="NO"){
+                            $('#coil-complete').prop('disabled', true);
+                            $('#coil-complete').addClass( 'not-allowed');
+                        }
+
+                        if(response["coil_status"]=="DRAW" && response["started_flag"]=="NO"){
+                            $('#ANNEALING').prop('disabled', true);
+                            $('#stop-process').prop('disabled', true);
+                            $('#ANNEALING').addClass( 'not-allowed');
+                            $('#stop-process').addClass( 'not-allowed');
+                            $('#furnace-name').addClass( 'remove-display');
+                            $('#furnace').addClass( 'remove-display');
+                            $('#coil-diameter-name').addClass( 'remove-display');
+                            $('#coil-diameter').addClass( 'remove-display');
+                        }
+                        else if(response["coil_status"]=="DRAW" && response["started_flag"]=="YES"){
+                            $('#ANNEALING').prop('disabled', true);
+                            $('#start-process').prop('disabled', true);
+                            $('#ANNEALING').addClass( 'not-allowed');
+                            $('#start-process').addClass( 'not-allowed');
+                            $('#furnace-name').addClass( 'remove-display');
+                            $('#furnace').addClass( 'remove-display');
+                            $('#drawbench-name').addClass( 'remove-display');
+                            $('#drawbench').addClass( 'remove-display');
+                        }
+                        else if(response["coil_status"]=="ANNEALING" && response["started_flag"]=="NO"){
+                            $('#DRAW').prop('disabled', true);
+                            $('#stop-process').prop('disabled', true);
+                            $('#DRAW').addClass( 'not-allowed');
+                            $('#stop-process').addClass( 'not-allowed');
+                            $('#drawbench-name').addClass( 'remove-display');
+                            $('#drawbench').addClass( 'remove-display');
+                            $('#coil-diameter-name').addClass( 'remove-display');
+                            $('#coil-diameter').addClass( 'remove-display');
+                        }
+                        else if(response["coil_status"]=="ANNEALING" && response["started_flag"]=="YES"){
+                            $('#DRAW').prop('disabled', true);
+                            $('#start-process').prop('disabled', true);
+                            $('#DRAW').addClass( 'not-allowed');
+                            $('#start-process').addClass( 'not-allowed');
+                            $('#drawbench-name').addClass( 'remove-display');
+                            $('#drawbench').addClass( 'remove-display');
+                            $('#furnace-name').addClass( 'remove-display');
+                            $('#furnace').addClass( 'remove-display');
+                        }
+                    }
+                    else {
+                        window.alert(response["error-msg"]);
+                    }
+                },
+                error: function (xhr, textstatus, errorthrown) {
+                    console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                }
+            });
+        }
+
+        $("#start-process").click(function (e) {
+
+            
+            var coil = $( "#all-coils" ).val()
+            var status=""
+            var machine=""
+
+            if (document.getElementById('DRAW').checked) {
+                status="DRAW"
+            }
+            else if(document.getElementById('ANNEALING').checked){
+                status="ANNEALING"
+            }
+
+            if(status==""){
+                window.alert("Please select atleast one process!!")
+            }
+            else if(status=="DRAW"){
+                machine=$( "#drawbench" ).val()
+            }
+            else{
+                machine=$( "#furnace" ).val()
+            }
+            
+            console.log(machine)
+            if(coil.length==0 || machine.length==0){
+                window.alert("All the fields are  required! Kindly fill them.")
+            }
+            else{      
+                $.ajax({
+                    url: "/start-process-coil/",
+                    type: "POST",
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    data: {
+                        coil:coil,
+                        status:status,
+                        machine:machine,
+                    },
+                    success: function (response) {
+                        console.log("Success!", response);
+                        
+                        if (response["status"] == 200) {
+                            window.alert("Success!!!")
+                            window.location.pathname = "/production"
+                            window.location.reload();
+                        }
+                        else {
+                            window.alert(response["error-msg"]);
+                        }
+                    },
+                    error: function (xhr, textstatus, errorthrown) {
+                        console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                    }
+                });
+            
+        }
+        });
+
+        $("#stop-process").click(function (e) {
+
+            
+            var coil = $( "#all-coils" ).val()
+            var status=""
+            var diameter=$("#coil-diameter").val()
+
+            if (document.getElementById('DRAW').checked) {
+                status="DRAW"
+            }
+            else if(document.getElementById('ANNEALING').checked){
+                status="ANNEALING"
+            }
+
+            if(status==""){
+                window.alert("Please select atleast one process!!")
+            }
+            
+            
+        
+            if(coil.length==0 || diameter.length==0){
+                window.alert("All the fields are  required! Kindly fill them.")
+            }
+            else{      
+                $.ajax({
+                    url: "/stop-process-coil/",
+                    type: "POST",
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    data: {
+                        coil:coil,
+                        status:status,
+                        diameter:diameter,
+                    },
+                    success: function (response) {
+                        console.log("Success!", response);
+                        
+                        if (response["status"] == 200) {
+                            window.alert("Success!!!")
+                            window.location.pathname = "/production"
+                            window.location.reload();
+                        }
+                        else {
+                            window.alert(response["error-msg"]);
+                        }
+                    },
+                    error: function (xhr, textstatus, errorthrown) {
+                        console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                    }
+                });
+            
+        }
+        });
+
+        $("#coil-complete").click(function (e) {
+
+            
+            var coil = $( "#all-coils" ).val()            
+
+            if(coil.length==0){
+                window.alert("Please select a coil!")
+            }
+            else{      
+                $.ajax({
+                    url: "/end-coil-production/",
+                    type: "POST",
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    data: {
+                        coil:coil
+                    },
+                    success: function (response) {
+                        console.log("Success!", response);
+                        
+                        if (response["status"] == 200) {
+                            window.alert("Success!!!")
+                            window.location.pathname = "/production"
+                            window.location.reload();
+                        }
+                        else {
+                            window.alert(response["error-msg"]);
+                        }
+                    },
+                    error: function (xhr, textstatus, errorthrown) {
+                        console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                    }
+                });
+            
+        }
+        });
+    </script>
+    
+</body>
+
+</html>

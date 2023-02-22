@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/login.js' %}"></script>
+    <title>The Login Form</title>
+</head>
+
+<body>
+    <div class="wrap">
+        <form class="login-form" action="">
+            <div class="form-header">
+                <h3>Login Form</h3>
+                <p>Login to access your dashboard</p>
+            </div>
+            <!--Username Input-->
+            <div class="form-group">
+                <input type="text" class="form-input" placeholder="username" id="username">
+            </div>
+            <!--Password Input-->
+            <div class="form-group">
+                <input type="password" class="form-input" placeholder="password" id="password">
+            </div>
+            <!--Login Button-->
+            <div class="form-group">
+                <button class="form-button" type="button" id="login-btn">Login</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function getCsrfToken() {
+            var CSRF_TOKEN = $('input[name="csrfmiddlewaretoken"]').val();
+            return CSRF_TOKEN;
+        }
+
+        $("#login-btn").click(function () {
+            $.ajax({
+                url: "/login-submit/",
+                type: "POST",
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                },
+                data: {
+                    username: $("#username").val(),
+                    password: $("#password").val()
+                },
+                success: function (response) {
+                    console.log("Success!", response);
+
+                    if (response["status"] == 200) {
+                        console.log("Success!!!")
+                        if(response["usertype"]=="STORE"){
+                            window.location.pathname = "/store"
+                        }
+                        else if(response["usertype"]=="PRODUCTION"){
+                            window.location.pathname = "/production"
+                        }
+                    }
+                    else {
+                        alert("The username or password is incorrect!");
+                    }
+                },
+                error: function (xhr, textstatus, errorthrown) {
+                    console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

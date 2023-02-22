@@ -1,0 +1,451 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/login.js' %}"></script>
+    <title>Store Page</title>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="column-format">
+            <button class="form-button" type="button" data-toggle="modal" data-target="#pipe-modal" id="pipe-btn"> Add Pipe</button>
+        </div>
+        <div class="column-format">
+            <button class="form-button" type="button" data-toggle="modal" data-target="#conductor-modal" id="conductor-btn"> Add Conductor</button>
+        </div>
+        <div class="column-format">
+            <button class="form-button" type="button" data-toggle="modal" data-target="#mgo-modal" id="mgo-btn" > Add MGO</button>
+        </div>
+    </div>
+
+    <div class="modal fade" id="pipe-modal" role="dialog">
+        <div class="modal-dialog">
+            <form class="login-form" action="">
+                <div class="form-header">
+                    <h3> New Pipe</h3>
+                    <p>Fill in the details to store a new pipe.</p>
+                </div>
+                <div class="form-group">
+                    <p> Lot Number</p>
+                    <input type="text" class="form-input" id="pipe-lot-number">
+                </div>
+                <div class="form-group">
+                    <p> Supplier Name</p>
+                    <input type="text" class="form-input" id="pipe-supplier-name">
+                </div>
+                <div class="form-group">
+                    <p> Alloy Type</p>
+                    <select name="pipe-alloy" id="pipe-alloy" class="form-input" onchange="loadPipeAlloyElements()">
+                        <option value=""></option>
+                        {% for alloy in pipe_alloy %}
+                            <option  value='{{alloy.alloy_name}}'>{{alloy.alloy_name}}</option>
+                        {% endfor %}    
+                      </select>
+                </div>
+                <div class="form-group" id = "pipe-element-list">
+                </div>
+                <div class="form-group">
+                    <p>Pipe Quantity</p>
+                    <input type="number" class="form-input" id="pipe-qty">
+                </div>
+                <div class="form-group">
+                    <p>Pipe Diameter</p>
+                    <input type="number" class="form-input" id="pipe-diameter">
+                </div>
+               
+                <div class="form-group">
+                    <button class="form-button" type="button" id="pipe-save-btn">Save Pipe</button>
+                </div>
+            </form>
+        </div>
+      </div>
+
+      <div class="modal fade" id="conductor-modal" role="dialog">
+        <div class="modal-dialog">
+            <form class="login-form" action="">
+                <div class="form-header">
+                    <h3> New Conductor</h3>
+                    <p>Fill in the details to store a new Conductor.</p>
+                </div>
+                <div class="form-group">
+                    <p> Lot Number</p>
+                    <input type="text" class="form-input" id="conductor-lot-number">
+                </div>
+                <div class="form-group">
+                    <p> Supplier Name</p>
+                    <input type="text" class="form-input" id="conductor-supplier-name">
+                </div>
+                <div class="form-group">
+                    <p> Alloy Type</p>
+                    <select name="conductor-alloy" id="conductor-alloy" class="form-input" onchange="loadConductorAlloyElements()">
+                        <option value=""></option>
+                        {% for alloy in conductor_alloy %}
+                            <option  value='{{alloy.alloy_name}}'>{{alloy.alloy_name}}</option>
+                        {% endfor %}    
+                      </select>
+                </div>
+                <div class="form-group" id = "conductor-element-list">
+                </div>
+                <div class="form-group">
+                    <p>Conductor Quantity</p>
+                    <input type="number" class="form-input" id="conductor-qty">
+                </div>
+                <div class="form-group">
+                    <p>Conductor Diameter</p>
+                    <input type="number" class="form-input" id="conductor-diameter">
+                </div>
+               
+                <div class="form-group">
+                    <button class="form-button" type="button" id="conductor-save-btn">Save Conductor</button>
+                </div>
+            </form>
+        </div>
+      </div>
+
+      <div class="modal fade" id="mgo-modal" role="dialog">
+        <div class="modal-dialog">
+            <form class="login-form" action="">
+                <div class="form-header">
+                    <h3> New MGO</h3>
+                    <p>Fill in the details to store a new MGO.</p>
+                </div>
+                <div class="form-group">
+                    <p> Lot Number</p>
+                    <input type="text" class="form-input" id="mgo-lot-number">
+                </div>
+                <div class="form-group">
+                    <p> Supplier Name</p>
+                    <input type="text" class="form-input" id="mgo-supplier-name">
+                </div>
+                <div class="form-group">
+                    <p> Alloy Type</p>
+                    <select name="mgo-alloy" id="mgo-alloy" class="form-input" onchange="loadMGOAlloyElements()">
+                        <option value=""></option>
+                        {% for alloy in mgo_alloy %}
+                            <option  value='{{alloy.alloy_name}}'>{{alloy.alloy_name}}</option>
+                        {% endfor %}    
+                      </select>
+                </div>
+                <div class="form-group" id = "mgo-element-list">
+                </div>
+                <div class="form-group">
+                    <p>MGO Quantity</p>
+                    <input type="number" class="form-input" id="mgo-qty">
+                </div>
+               
+                <div class="form-group">
+                    <button class="form-button" type="button" id="mgo-save-btn">Save MGO</button>
+                </div>
+            </form>
+        </div>
+      </div>
+
+    <script>
+        function getCsrfToken() {
+            var CSRF_TOKEN = $('input[name="csrfmiddlewaretoken"]').val();
+            return CSRF_TOKEN;
+        }
+
+//Pipe
+        $("#pipe-save-btn").click(function () {
+            var pipeLotNumber = $("#pipe-lot-number").val()
+            var pipeSupplierName = $("#pipe-supplier-name").val()
+            var pipeQty = parseFloat($("#pipe-qty").val())
+            var pipeAlloy = $( "#pipe-alloy" ).val()
+            var pipeDiameter = parseFloat($("#pipe-diameter").val())
+
+            console.log(pipeLotNumber)
+
+            if(pipeLotNumber.length ==0 || pipeSupplierName.length==0 || pipeQty.length==0 || pipeAlloy.length==0 || pipeDiameter.length==0){
+                window.alert("All the fields are  required! Kindly fill them.")
+            }
+            else{      
+                var listOfElementsPipe=$("#pipe-element-list").find(" input ")
+                var pipeErrorMsg=""
+                var pipeElement =[]
+                for(var i=0;i<listOfElementsPipe.length;i++){
+                    
+                    if(parseFloat(listOfElementsPipe[i].value) < listOfElementsPipe[i].min || parseFloat(listOfElementsPipe[i].value) > listOfElementsPipe[i].max){
+                        pipeErrorMsg = "Minimum and Maximum accepted % for metal "+listOfElementsPipe[i].id+ " is "+listOfElementsPipe[i].min+" and "+listOfElementsPipe[i].max + ".\n" 
+                    }
+                    pipeElement.push({id: listOfElementsPipe[i].id, value: parseFloat(listOfElementsPipe[i].value)});
+                }
+                if(pipeErrorMsg!=""){
+                    window.alert(pipeErrorMsg)
+                }
+                else{
+                    
+                    $.ajax({
+                        url: "/save-pipe/",
+                        type: "POST",
+                        headers: {
+                            'X-CSRFToken': getCsrfToken()
+                        },
+                        data: {
+                            lotnumber: pipeLotNumber,
+                            suppliername: pipeSupplierName,
+                            alloyname: pipeAlloy,
+                            alloyelements:JSON.stringify(pipeElement),
+                            quantity:pipeQty,
+                            diameter:pipeDiameter
+                        },
+                        success: function (response) {
+                            console.log("Success!", response);
+                            
+                            if (response["status"] == 200) {
+                                // window.alert("Success!!!")
+                                window.location.pathname = "/store"
+                            }
+                            else {
+                                window.alert(response["error-msg"]);
+                            }
+                        },
+                        error: function (xhr, textstatus, errorthrown) {
+                            console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                        }
+                    });
+                }
+            }
+        });
+
+        function loadPipeAlloyElements(){
+            $.ajax({
+                url: "/fetch-pipe-element/",
+                type: "POST",
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                },
+                data: {
+                    alloy: $( "#pipe-alloy" ).val()
+                },
+                success: function (response) {
+                    console.log("Success!", response);
+
+                    if (response["status"] == 200) {
+                        var pipeDivHTML=""
+                        for(var i=0;i<response['alloy_element_mapping'].length;i++){
+                            var pipeObj = response['alloy_element_mapping'][i]
+                           pipeDivHTML = pipeDivHTML+" <p> "+pipeObj.element_obj_id+"</p><input type=\"number\" class=\"form-input\" id=\""+pipeObj.element_obj_id+"\" max=\""+pipeObj.max_percent+"\" min=\""+pipeObj.min_percent+"\">"
+                        }
+                        $("#pipe-element-list").html(pipeDivHTML);
+                    }
+                    else {
+                        window.alert(response["error-msg"]);
+                    }
+                },
+                error: function (xhr, textstatus, errorthrown) {
+                    console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                }
+            });
+        }
+
+//Conductor
+
+        $("#conductor-save-btn").click(function () {
+            var conductorLotNumber = $("#conductor-lot-number").val()
+            var conductorSupplierName = $("#conductor-supplier-name").val()
+            var conductorQty = parseFloat($("#conductor-qty").val())
+            var conductorAlloy = $( "#conductor-alloy" ).val()
+            var conductorDiameter = parseFloat($("#conductor-diameter").val())
+
+            if(conductorLotNumber.length ==0 || conductorSupplierName.length==0 || conductorQty.length==0 || conductorAlloy.length==0 || conductorDiameter.length==0){
+                window.alert("All the fields are  required! Kindly fill them.")
+            }
+            else{      
+                var listOfElementsConductor=$("#conductor-element-list").find(" input ")
+                var conductorErrorMsg=""
+                var conductorElement =[]
+
+                if(conductorAlloy=="Nickel" || conductorAlloy=="Copper"){
+                    for(var i=0;i<listOfElementsConductor.length;i++){
+                        if(parseFloat(listOfElementsConductor[i].value) < listOfElementsConductor[i].min || parseFloat(listOfElementsConductor[i].value) > listOfElementsConductor[i].max){
+                            conductorErrorMsg = "Minimum and Maximum accepted % for metal "+listOfElementsConductor[i].id+ " is "+listOfElementsConductor[i].min+" and "+listOfElementsConductor[i].max + ".\n" 
+                        }
+                        conductorElement.push({id: listOfElementsConductor[i].id, positive_value: parseFloat(listOfElementsConductor[i].value)});
+                    }
+                }
+                else{
+                    for(var i=0;i<listOfElementsConductor.length;i=i+2){
+                        if(parseFloat(listOfElementsConductor[i].value) < listOfElementsConductor[i].min || parseFloat(listOfElementsConductor[i].value) > listOfElementsConductor[i].max || parseFloat(listOfElementsConductor[i+1].value) < listOfElementsConductor[i+1].min || parseFloat(listOfElementsConductor[i+1].value) > listOfElementsConductor[i+1].max){
+                            conductorErrorMsg = "Minimum and Maximum accepted % for metal (positive) "+listOfElementsConductor[i].id+ " is "+listOfElementsConductor[i].min+" and "+listOfElementsConductor[i].max + ". Minimum and Maximum accepted % for metal (negative) "+listOfElementsConductor[i].id+ " is "+listOfElementsConductor[i+1].min+" and "+listOfElementsConductor[i+1].max + ".\n" 
+                        }
+                        conductorElement.push({id: listOfElementsConductor[i].id, positive_value: parseFloat(listOfElementsConductor[i].value),negative_value: parseFloat(listOfElementsConductor[i+1].value)});
+                    }
+                }
+                if(conductorErrorMsg!=""){
+                    window.alert(conductorErrorMsg)
+                }
+                else{
+                    
+                    $.ajax({
+                        url: "/save-conductor/",
+                        type: "POST",
+                        headers: {
+                            'X-CSRFToken': getCsrfToken()
+                        },
+                        data: {
+                            lotnumber: conductorLotNumber,
+                            suppliername: conductorSupplierName,
+                            alloyname: conductorAlloy,
+                            alloyelements:JSON.stringify(conductorElement),
+                            quantity:conductorQty,
+                            diameter:conductorDiameter
+                        },
+                        success: function (response) {
+                            console.log("Success!", response);
+                            
+                            if (response["status"] == 200) {
+                                // window.alert("Success!!!")
+                                window.location.pathname = "/store"
+                            }
+                            else {
+                                window.alert(response["error-msg"]);
+                            }
+                        },
+                        error: function (xhr, textstatus, errorthrown) {
+                            console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                        }
+                    });
+                }
+            }
+        });
+
+        function loadConductorAlloyElements(){
+            $.ajax({
+                url: "/fetch-conductor-element/",
+                type: "POST",
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                },
+                data: {
+                    alloy: $( "#conductor-alloy" ).val()
+                },
+                success: function (response) {
+                    console.log("Success!", response);
+
+                    if (response["status"] == 200) {
+                        var conductorDivHTML=""
+                        for(var i=0;i<response['alloy_element_mapping'].length;i++){
+
+                            if($( "#conductor-alloy" ).val()=="Copper" || $( "#conductor-alloy" ).val()=="Nickel"){
+                                var conductorObj = response['alloy_element_mapping'][i]
+                           conductorDivHTML = conductorDivHTML+" <p> "+conductorObj.element_obj_id+"</p><input type=\"number\" class=\"form-input\" id=\""+conductorObj.element_obj_id+"\" max=\""+conductorObj.positive_max_percent+"\" min=\""+conductorObj.positive_min_percent+"\">"
+                            }
+                            else{
+                                var conductorObj = response['alloy_element_mapping'][i]
+                           conductorDivHTML = conductorDivHTML+" <p> "+conductorObj.element_obj_id+"</p><input type=\"number\" placeholder=\"Positive Value\" class=\"positive-negative\" id=\""+conductorObj.element_obj_id+"\" max=\""+conductorObj.positive_max_percent+"\" min=\""+conductorObj.positive_min_percent+"\"> </p><input type=\"number\" placeholder=\"Negative Value\" class=\"positive-negative\" id=\""+conductorObj.element_obj_id+"\" max=\""+conductorObj.negative_max_percent+"\" min=\""+conductorObj.negative_min_percent+"\">"
+                            }
+                           
+                        }
+                        $("#conductor-element-list").html(conductorDivHTML);
+                    }
+                    else {
+                        window.alert(response["error-msg"]);
+                    }
+                },
+                error: function (xhr, textstatus, errorthrown) {
+                    console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                }
+            });
+        }
+
+//MGO
+        $("#mgo-save-btn").click(function () {
+            var mgoLotNumber = $("#mgo-lot-number").val()
+            var mgoSupplierName = $("#mgo-supplier-name").val()
+            var mgoQty = parseFloat($("#mgo-qty").val())
+            var mgoAlloy = $( "#mgo-alloy" ).val()
+
+            if(mgoLotNumber.length ==0 || mgoSupplierName.length==0 || mgoQty.length==0 || mgoAlloy.length==0){
+                window.alert("All the fields are  required! Kindly fill them.")
+            }
+            else{      
+                var listOfElementsMGO=$("#mgo-element-list").find(" input ")
+                var mgoErrorMsg=""
+                var mgoElement =[]
+                for(var i=0;i<listOfElementsMGO.length;i++){
+                    
+                    if(parseFloat(listOfElementsMGO[i].value) < listOfElementsMGO[i].min || parseFloat(listOfElementsMGO[i].value) > listOfElementsMGO[i].max){
+                        mgoErrorMsg = "Minimum and Maximum accepted % for metal "+listOfElementsMGO[i].id+ " is "+listOfElementsMGO[i].min+" and "+listOfElementsMGO[i].max + ".\n" 
+                    }
+                    mgoElement.push({id: listOfElementsMGO[i].id, value: parseFloat(listOfElementsMGO[i].value)});
+                }
+                if(mgoErrorMsg!=""){
+                    window.alert(mgoErrorMsg)
+                }
+                else{
+                    
+                    $.ajax({
+                        url: "/save-mgo/",
+                        type: "POST",
+                        headers: {
+                            'X-CSRFToken': getCsrfToken()
+                        },
+                        data: {
+                            lotnumber: mgoLotNumber,
+                            suppliername: mgoSupplierName,
+                            alloyname: mgoAlloy,
+                            alloyelements:JSON.stringify(mgoElement),
+                            quantity:mgoQty
+                        },
+                        success: function (response) {
+                            console.log("Success!", response);
+                            
+                            if (response["status"] == 200) {
+                                // window.alert("Success!!!")
+                                window.location.pathname = "/store"
+                            }
+                            else {
+                                window.alert(response["error-msg"]);
+                            }
+                        },
+                        error: function (xhr, textstatus, errorthrown) {
+                            console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                        }
+                    });
+                }
+            }
+        });
+
+        function loadMGOAlloyElements(){
+            $.ajax({
+                url: "/fetch-mgo-element/",
+                type: "POST",
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                },
+                data: {
+                    alloy: $( "#mgo-alloy" ).val()
+                },
+                success: function (response) {
+                    console.log("Success!", response);
+
+                    if (response["status"] == 200) {
+                        var mgoDivHTML=""
+                        for(var i=0;i<response['alloy_element_mapping'].length;i++){
+                            var mgoObj = response['alloy_element_mapping'][i]
+                           mgoDivHTML = mgoDivHTML+" <p> "+mgoObj.element_obj_id+"</p><input type=\"number\" class=\"form-input\" id=\""+mgoObj.element_obj_id+"\" max=\""+mgoObj.max_percent+"\" min=\""+mgoObj.min_percent+"\">"
+                        }
+                        $("#mgo-element-list").html(mgoDivHTML);
+                    }
+                    else {
+                        window.alert(response["error-msg"]);
+                    }
+                },
+                error: function (xhr, textstatus, errorthrown) {
+                    console.log("Please report this error: " + errorthrown + xhr.status + xhr.responseText);
+                }
+            });
+        }
+    </script>
+    
+</body>
+
+</html>
